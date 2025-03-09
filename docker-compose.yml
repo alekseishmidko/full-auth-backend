@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: auth_postgres
+    image: postgres:15.2
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  redis:
+    container_name: auth_redis
+    image: redis:5.0
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+  redisinsight:
+    container_name: auth_redisinsight
+    image: redislabs/redisinsight:latest
+    restart: always
+    ports:
+      - '8001:8001'
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  backend:
