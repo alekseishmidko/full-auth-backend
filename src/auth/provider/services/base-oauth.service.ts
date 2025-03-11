@@ -38,52 +38,54 @@ export class BaseOauthService {
     const tokenQuery = new URLSearchParams({
       client_id,
       client_secret,
+      code,
       redirect_uri: this.getRedirectUrl(),
       grant_type: 'authorization_code',
     });
 
-    const tokenRequest = await fetch(this.options.access_url, {
+    const tokensRequest = await fetch(this.options.access_url, {
       method: 'POST',
       body: tokenQuery,
       headers: {
-        'Content-type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json',
       },
     });
 
-    const tokenResponse = await tokenRequest.json();
-
-    if (!tokenRequest.ok) {
+    if (!tokensRequest.ok) {
       throw new BadRequestException(
-        `Не удалось получить пользователя с ${this.options.profile_url}, Проверьте правильность токена доступа`,
+        `Не удалось получить пользователя с ${this.options.profile_url}. Проверьте правильность токена доступа.`,
       );
     }
 
-    if (!tokenResponse.access_token) {
+    const tokens = await tokensRequest.json();
+
+    if (!tokens.access_token) {
       throw new BadRequestException(
-        `нет токенов с ${this.options.access_url} убедитесь что код авторизации действителен`,
+        `Нет токенов с ${this.options.access_url}. Убедитесь, что код авторизации действителен.`,
       );
     }
 
     const userRequest = await fetch(this.options.profile_url, {
-      headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+      headers: {
+        Authorization: `Bearer ${tokens.access_token}`,
+      },
     });
 
-    if (userRequest.ok) {
+    if (!userRequest.ok) {
       throw new UnauthorizedException(
-        `Не удалось получить пользователя с ${this.options.profile_url}. проверьте правильность токена доступа`,
+        `Не удалось получить пользователя с ${this.options.profile_url}. Проверьте правильность токена доступа.`,
       );
     }
 
     const user = await userRequest.json();
-
     const userData = await this.extractUserInfo(user);
 
     return {
       ...userData,
-      access_token: tokenResponse.access_token,
-      refresh_token: tokenResponse.refresh_token,
-      expires_at: tokenResponse.expires_at || tokenResponse.expires_in,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expires_at: tokens.expires_at || tokens.expires_in,
       provider: this.options.name,
     };
   }
