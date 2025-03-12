@@ -6,6 +6,9 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ProviderModule } from './auth/provider/provider.module';
 
+import { EmailConfirmationModule } from './email-confirmation/email-confirmation.module';
+import { MailModule } from './libs/mail/mail.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: !IS_DEV_ENV }),
@@ -13,6 +16,8 @@ import { ProviderModule } from './auth/provider/provider.module';
     AuthModule,
     UserModule,
     ProviderModule,
+    MailModule,
+    EmailConfirmationModule,
   ],
   controllers: [],
   providers: [],

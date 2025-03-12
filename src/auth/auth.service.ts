@@ -14,6 +14,7 @@ import { LoginDto } from './dto/login.dto';
 import { verify } from 'argon2';
 import { ConfigService } from '@nestjs/config';
 import { ProviderService } from './provider/provider.service';
+import { EmailConfirmationService } from '@/email-confirmation/email-confirmation.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly config: ConfigService,
     private readonly providerService: ProviderService,
+    private readonly emailConfirmationService: EmailConfirmationService,
   ) {}
   public async register(dto: RegisterDto, req: Request) {
     const isExist = await this.userService.findByEmail(dto.email);
@@ -38,8 +40,12 @@ export class AuthService {
       AuthMethod.CREDENTIALS,
       false,
     );
-    this.saveSession(req, newUser);
-    return newUser;
+    await this.emailConfirmationService.sendVerificationToken(newUser.email);
+
+    return {
+      message:
+        'Вы успешно зарегистрировались. Пожалуйста, подтвердите ваш email. Сообщение было отправлено на ваш почтовый адрес.',
+    };
   }
   public async login(dto: LoginDto, req: Request) {
     const user = await this.userService.findByEmail(dto.email);
@@ -50,6 +56,30 @@ export class AuthService {
     if (!isValidPassword) {
       throw new UnauthorizedException('Неверный пароль');
     }
+
+    if (!user.isVerified) {
+      await this.emailConfirmationService.sendVerificationToken(user.email);
+      throw new UnauthorizedException(
+        'Ваш email не подтвержден. Пожалуйста, проверьте вашу почту и подтвердите адрес.',
+      );
+    }
+
+    // if (user.isTwoFactorEnabled) {
+    //   if (!dto.code) {
+    //     await this.twoFactorAuthService.sendTwoFactorToken(user.email);
+
+    //     return {
+    //       message:
+    //         'Проверьте вашу почту. Требуется код двухфакторной аутентификации.',
+    //     };
+    //   }
+
+    //   await this.twoFactorAuthService.validateTwoFactorToken(
+    //     user.email,
+    //     dto.code,
+    //   );
+    // }
+
     return this.saveSession(req, user);
   }
   public async logout(req: Request, res: Response): Promise<void> {
@@ -68,7 +98,7 @@ export class AuthService {
       });
     });
   }
-  private async saveSession(req: Request, user: User) {
+  public async saveSession(req: Request, user: User) {
     return new Promise((resolve, reject) => {
       req.session.userId = user.id;
       req.session.save((err) => {
