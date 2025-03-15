@@ -8,6 +8,8 @@ import { ProviderModule } from './auth/provider/provider.module';
 
 import { EmailConfirmationModule } from './email-confirmation/email-confirmation.module';
 import { MailModule } from './libs/mail/mail.module';
+import { PasswordRecoveryModule } from './password-recovery/password-recovery.module';
+import { TwoFactorAuthModule } from './auth/two-factor-auth/two-factor-auth.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { MailModule } from './libs/mail/mail.module';
     ProviderModule,
     MailModule,
     EmailConfirmationModule,
+    PasswordRecoveryModule,
+    TwoFactorAuthModule,
   ],
   controllers: [],
   providers: [],

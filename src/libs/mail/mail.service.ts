@@ -6,10 +6,6 @@ import { TwoFactorAuthTemplate } from './templates/two-factor-auth.template';
 import { ResetPasswordTemplate } from './templates/reset-password.template';
 import { ConfirmationTemplate } from './templates/confirmation.template';
 
-// import { ConfirmationTemplate } from './templates/confirmation.template';
-// import { ResetPasswordTemplate } from './templates/reset-password.template';
-// import { TwoFactorAuthTemplate } from './templates/two-factor-auth.template';
-
 @Injectable()
 export class MailService {
   public constructor(
