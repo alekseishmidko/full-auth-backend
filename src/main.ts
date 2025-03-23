@@ -26,13 +26,13 @@ async function bootstrap() {
       cookie: {
         domain: config.getOrThrow<string>('SESSION_DOMAIN'),
         maxAge: ms(config.getOrThrow<StringValue>('SESSION_MAX_AGE')),
-        httpOnly: parseBoolean(config.getOrThrow('SESSION_HTTP_ONLY')),
-        secure: parseBoolean(config.getOrThrow('SESSION_SECURE')),
+        httpOnly: parseBoolean(config.getOrThrow<string>('SESSION_HTTP_ONLY')),
+        secure: parseBoolean(config.getOrThrow<string>('SESSION_SECURE')),
         sameSite: 'lax',
       },
       store: new RedisStore({
         client: redis,
-        prefix: config.getOrThrow('SESSION_FOLDER'),
+        prefix: config.getOrThrow<string>('SESSION_FOLDER'),
       }),
     }),
   );

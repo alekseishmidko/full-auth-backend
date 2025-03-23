@@ -103,15 +103,19 @@ export class AuthService {
   public async saveSession(req: Request, user: User) {
     return new Promise((resolve, reject) => {
       req.session.userId = user.id;
+
       req.session.save((err) => {
         if (err) {
           return reject(
             new InternalServerErrorException(
-              'не удалось сохранить сессию, проверьте параметры сессии',
+              'Не удалось сохранить сессию. Проверьте, правильно ли настроены параметры сессии.',
             ),
           );
         }
-        resolve({ user });
+
+        resolve({
+          user,
+        });
       });
     });
   }
